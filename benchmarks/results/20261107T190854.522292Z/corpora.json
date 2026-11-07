@@ -1,0 +1,35 @@
+[
+  {
+    "name": "random32-p010",
+    "description": "8192 independent G(32, 0.1) labelled graphs",
+    "graphs": 8192,
+    "orders": [
+      32
+    ],
+    "seed": 1729,
+    "sha256": "6bb79bc3e9ead1732c10e5597225600e2825f4f48f571b09b3f9fe12326cd727",
+    "file": "corpora/random32-p010.g6"
+  },
+  {
+    "name": "random32-p050",
+    "description": "8192 independent G(32, 0.5) labelled graphs",
+    "graphs": 8192,
+    "orders": [
+      32
+    ],
+    "seed": 1729,
+    "sha256": "b70759dec6ade4752b5b568d33ca58664e0f61cadd62a1ca8024ac69f9f98e56",
+    "file": "corpora/random32-p050.g6"
+  },
+  {
+    "name": "cycles32",
+    "description": "Seeded relabellings of the cycle C32",
+    "graphs": 4096,
+    "orders": [
+      32
+    ],
+    "seed": 1729,
+    "sha256": "acf140a61bb0d844d65e5238c84cae62db8d6a8952d7f683fae7146b16bbe3cd",
+    "file": "corpora/cycles32.g6"
+  }
+]

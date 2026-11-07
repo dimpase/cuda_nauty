@@ -1,0 +1,52 @@
+Canonical labelling timings: single-threaded CPU baselines
+Workstation timings; background processes were not controlled.
+Core timers exclude generation, graph6 parsing, startup, and JSON I/O.
+CUDA primary times include H2D + kernel + D2H; kernel-only times are separate.
+Metal primary times include command creation, input/output memcpy, dispatch and synchronization; GPU command time is separate.
+GPU comparisons require a matching prototype CPU canonical-result checksum.
+Loop counts may differ by backend; all rates use graphs * loops.
+CUDA: NOT MEASURED (no --cuda executable supplied)
+Metal: MEASURED
+
+dataset                backend    status              loops   ms/trial    us/graph  vs proto
+geng8                  prototype  ok                     26    161.523       0.503      1.00
+  Trial duration fell below the calibration target; interpret small differences cautiously.
+geng8                  nauty      ok                     38    236.289       0.504      1.00
+geng8                  traces     ok                     14    242.146       1.401      0.36
+geng8                  metal      ok                     21    230.785       0.890      0.57
+  Metal GPU command: 0.816 us/graph; transfer-inclusive speedup vs nauty CPU: 0.57; vs Traces CPU: 1.57.
+random32-p010          prototype  ok                     48    229.564       4.670      1.00
+random32-p010          nauty      ok                     90    219.444       2.381      1.96
+random32-p010          traces     ok                     78    202.827       2.539      1.84
+random32-p010          metal      ok                     27    142.946       5.170      0.90
+  Metal GPU command: 4.977 us/graph; transfer-inclusive speedup vs nauty CPU: 0.46; vs Traces CPU: 0.49.
+  Trial duration fell below the calibration target; interpret small differences cautiously.
+random32-p050          prototype  ok                     46    238.350       5.060      1.00
+random32-p050          nauty      ok                    147    235.970       1.568      3.23
+random32-p050          traces     ok                     82    197.399       2.351      2.15
+  Trial duration fell below the calibration target; interpret small differences cautiously.
+random32-p050          metal      ok                    103    123.593       1.172      4.32
+  Metal GPU command: 1.003 us/graph; transfer-inclusive speedup vs nauty CPU: 1.34; vs Traces CPU: 2.01.
+  Trial duration fell below the calibration target; interpret small differences cautiously.
+cycles32               prototype  ok                      5    223.159     697.372      1.00
+cycles32               nauty      ok                    547    248.461       7.097     98.26
+cycles32               traces     ok                   1409    172.093       1.908    365.42
+  Trial duration fell below the calibration target; interpret small differences cautiously.
+cycles32               metal      ok                      2    434.381    3393.600      0.21
+  Metal GPU command: 3390.214 us/graph; transfer-inclusive speedup vs nauty CPU: 0.00; vs Traces CPU: 0.00.
+hypercubes32           prototype  ok                      1    982.912   15358.005      1.00
+hypercubes32           nauty      ok                    419    219.050       8.169   1880.12
+hypercubes32           traces     ok                    181    225.391      19.457    789.33
+hypercubes32           metal      ok                      1   4975.102   77735.967      0.20
+  Metal GPU command: 77509.371 us/graph; transfer-inclusive speedup vs nauty CPU: 0.00; vs Traces CPU: 0.00.
+rook-shrikhande16      prototype  ok                      5    248.434     776.356      1.00
+rook-shrikhande16      nauty      ok                   1197    210.216       2.744    282.92
+rook-shrikhande16      traces     ok                    285    221.560      12.147     63.91
+rook-shrikhande16      metal      ok                      1    436.492    6820.193      0.11
+  Metal GPU command: 6816.829 us/graph; transfer-inclusive speedup vs nauty CPU: 0.00; vs Traces CPU: 0.00.
+clique-empty32         prototype  ok                    269    224.895      13.063      1.00
+clique-empty32         nauty      ok                     62    222.617      56.103      0.23
+clique-empty32         traces     ok                     81    228.696      44.116      0.30
+clique-empty32         metal      ok                     29    119.061      64.149      0.20
+  Metal GPU command: 61.033 us/graph; transfer-inclusive speedup vs nauty CPU: 0.87; vs Traces CPU: 0.69.
+  Trial duration fell below the calibration target; interpret small differences cautiously.

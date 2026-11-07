@@ -200,7 +200,8 @@ Performance status and next steps
 
 The `initial timing report <benchmarks/RESULTS.rst>`_ records seven CPU
 workloads against nauty and Traces, with raw samples and reproducible corpora.
-CUDA speedup remains unmeasured.
+The `Metal timing report <benchmarks/METAL_RESULTS.rst>`_ adds native M4 Max
+GPU measurements and a larger-batch follow-up. CUDA speedup remains unmeasured.
 
 Verified during development on 2026-11-07:
 

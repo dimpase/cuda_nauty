@@ -1,0 +1,27 @@
+Canonical labelling timings: single-threaded CPU baselines
+Workstation timings; background processes were not controlled.
+Core timers exclude generation, graph6 parsing, startup, and JSON I/O.
+CUDA primary times include H2D + kernel + D2H; kernel-only times are separate.
+Metal primary times include command creation, input/output memcpy, dispatch and synchronization; GPU command time is separate.
+GPU comparisons require a matching prototype CPU canonical-result checksum.
+Loop counts may differ by backend; all rates use graphs * loops.
+CUDA: NOT MEASURED (no --cuda executable supplied)
+Metal: MEASURED
+
+dataset                backend    status              loops   ms/trial    us/graph  vs proto
+random32-p010          prototype  ok                      9    354.035       4.802      1.00
+random32-p010          nauty      ok                     18    366.260       2.484      1.93
+random32-p010          traces     ok                     16    348.233       2.657      1.81
+random32-p010          metal      ok                     23    349.584       1.855      2.59
+  Metal GPU command: 1.796 us/graph; transfer-inclusive speedup vs nauty CPU: 1.34; vs Traces CPU: 1.43.
+random32-p050          prototype  ok                      9    368.938       5.004      1.00
+random32-p050          nauty      ok                     28    343.549       1.498      3.34
+random32-p050          traces     ok                     17    334.777       2.404      2.08
+random32-p050          metal      ok                     72    189.239       0.321     15.60
+  Metal GPU command: 0.260 us/graph; transfer-inclusive speedup vs nauty CPU: 4.67; vs Traces CPU: 7.49.
+  Trial duration fell below the calibration target; interpret small differences cautiously.
+cycles32               prototype  ok                      1   2780.179     678.755      1.00
+cycles32               nauty      ok                     13    354.079       6.650    102.07
+cycles32               traces     ok                     48    339.999       1.729    392.50
+cycles32               metal      ok                      2    448.103      54.700     12.41
+  Metal GPU command: 54.633 us/graph; transfer-inclusive speedup vs nauty CPU: 0.12; vs Traces CPU: 0.03.
