@@ -1,9 +1,9 @@
-GPU canonical labelling prototype
-=================================
+cuda_nauty
+==========
 
 This is an initial, independent C++/CUDA/Metal implementation of exact
 individualization--refinement canonical labelling, with unmodified nauty as
-the test oracle. It is a starting point for the requested nauty/Traces GPU
+the test oracle. It is a starting point for nauty/Traces GPU
 work, rather than a complete port of either program.
 
 Scope
@@ -46,6 +46,8 @@ Build and test on the CPU
 Requirements: CMake 3.24+, a C++17 compiler, and Python 3 for the oracle tests.
 The latter also require nauty's ``geng`` and ``labelg`` executables::
 
+    git clone https://github.com/dimpase/cuda_nauty.git
+    cd cuda_nauty
     cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DNAUTY_CUDA_ENABLE_CUDA=OFF
     cmake --build build -j
     ctest --test-dir build --output-on-failure
