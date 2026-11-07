@@ -93,6 +93,56 @@ Exit status 0 means all records completed, 2 means some were invalid or
 incomplete, and 3 means an option, I/O, or backend error occurred. Empty input
 does not initialize CUDA. Header-only lines are accepted.
 
+Timing canonical labelling
+--------------------------
+
+Install the nauty library and its pkg-config metadata (``libnauty.pc``), then
+configure and build as above. With ``NAUTY_CUDA_BUILD_BENCHMARKS=ON`` (the
+default), CMake builds ``nauty-benchmark-cpu`` when it finds that library,
+and ``nauty-benchmark-cuda`` when CUDA is enabled. Run the CPU comparison::
+
+    python3 benchmarks/run.py --cpu build/nauty-benchmark-cpu
+
+The driver saves the generated graph6 corpora, hashes, commands, raw timing
+samples, and JSON/CSV/text summaries in a timestamped directory under
+``benchmarks/results``. It compares the prototype, dense nauty, and Traces
+on identical inputs: all unlabelled 8-vertex graphs, seeded sparse/dense
+random 32-vertex graphs, and several symmetric families. Each CPU backend
+uses one thread. These are batch throughput measurements, not single-graph
+latencies or measurements of a complete graph generator.
+
+Each backend gets a warmup and five measured trials. Calibration chooses
+the number of corpus repetitions per trial, targeting at least 0.1 seconds.
+The reported microseconds per graph are median trial seconds divided by
+the number of completed calls. Graph generation, parsing, input conversion,
+process startup, output, and checksums are outside timing. Required per-call
+library initialization and result bookkeeping are included. The prototype's
+node budget is one million per graph; incomplete runs have no comparable
+throughput. Nauty and Traces compute additional automorphism information,
+which the prototype does not yet provide.
+
+On an NVIDIA machine, build both benchmark executables and run them together::
+
+    python3 benchmarks/run.py \
+        --cpu build-cuda/nauty-benchmark-cpu \
+        --cuda build-cuda/nauty-benchmark-cuda
+
+CUDA results must match the CPU prototype's canonical-output checksum.
+The primary CUDA timer includes host-to-device copies, kernel launch and
+execution, synchronization, and device-to-host copies. CUDA events also
+report kernel-only time. Buffers are allocated before timing and reused;
+host buffers use ordinary pageable memory. No transfer/compute overlap is
+attempted. Result validation is outside both timers, between batches.
+Ratios against nauty and Traces are reported separately from ratios against
+the prototype CPU code. Run the correctness suite and Compute Sanitizer
+on that NVIDIA machine before relying on its timing results.
+
+For meaningful CPU/GPU ratios, collect both sides on the same machine.
+The default batch capacity is 4096; small corpora can underutilize a GPU.
+Use ``--random-count``, ``--symmetric-count``, and ``--batch-size`` to study
+batch-size effects, and increase ``--timeout``/``--max-total-seconds`` for
+longer runs. CUDA speedup is unmeasured until such a run succeeds.
+
 Performance status and next steps
 ---------------------------------
 
