@@ -1,0 +1,13 @@
+[
+  {
+    "name": "cycles32",
+    "description": "Seeded relabellings of the cycle C32",
+    "graphs": 64,
+    "orders": [
+      32
+    ],
+    "seed": 1729,
+    "sha256": "72130da41fcb6e47f0facd61b1d198e83ef28cc6a88ffe57977bffda723557a3",
+    "file": "corpora/cycles32.g6"
+  }
+]

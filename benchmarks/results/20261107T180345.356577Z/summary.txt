@@ -1,0 +1,31 @@
+Canonical labelling timings: single-threaded CPU baselines
+Workstation timings; background processes were not controlled.
+Core timers exclude generation, graph6 parsing, startup, and JSON I/O.
+CUDA primary times include H2D + kernel + D2H; kernel-only times are separate.
+CUDA comparisons require a matching prototype CPU canonical-result checksum.
+Loop counts may differ by backend; all rates use graphs * loops.
+CUDA: NOT MEASURED (no --cuda executable supplied)
+
+dataset                backend    status              loops   ms/trial    us/graph  vs proto
+geng8                  prototype  ok                     19    120.497       0.514      1.00
+geng8                  nauty      ok                     19    118.388       0.505      1.02
+geng8                  traces     ok                      7    124.872       1.445      0.36
+random32-p010          prototype  ok                     24    117.263       4.771      1.00
+random32-p010          nauty      ok                     44    107.508       2.386      2.00
+random32-p010          traces     ok                     40    105.165       2.568      1.86
+random32-p050          prototype  ok                     23    115.483       4.903      1.00
+random32-p050          nauty      ok                     73    101.969       1.364      3.59
+random32-p050          traces     ok                     45    103.107       2.238      2.19
+cycles32               prototype  ok                      3    127.492     664.023      1.00
+cycles32               nauty      ok                    274    111.369       6.351    104.56
+cycles32               traces     ok                    853     89.605       1.641    404.56
+  Trial duration fell below the calibration target; interpret small differences cautiously.
+hypercubes32           prototype  ok                      1    969.827   15153.547      1.00
+hypercubes32           nauty      ok                    210    109.376       8.138   1862.05
+hypercubes32           traces     ok                     90    112.714      19.568    774.39
+rook-shrikhande16      prototype  ok                      3    153.964     801.897      1.00
+rook-shrikhande16      nauty      ok                    584    102.112       2.732    293.52
+rook-shrikhande16      traces     ok                    142    108.790      11.971     66.99
+clique-empty32         prototype  ok                    119    113.772      14.939      1.00
+clique-empty32         nauty      ok                     31    111.799      56.350      0.27
+clique-empty32         traces     ok                     41    116.335      44.335      0.34

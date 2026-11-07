@@ -1,0 +1,79 @@
+[
+  {
+    "name": "geng8",
+    "description": "Every unlabelled simple graph of order 8, in geng output order",
+    "graphs": 12346,
+    "orders": [
+      8
+    ],
+    "seed": 1729,
+    "sha256": "6b740e1c1ec4f6c7d5539e2e236da0f1ad6aa3120d534590b0ea1f09ddc0b345",
+    "file": "corpora/geng8.g6"
+  },
+  {
+    "name": "random32-p010",
+    "description": "1024 independent G(32, 0.1) labelled graphs",
+    "graphs": 1024,
+    "orders": [
+      32
+    ],
+    "seed": 1729,
+    "sha256": "7a52e0b7cc51e414562249fdbedf7f9c23ab11a4b8f3e08d08f8e794c7e8b50e",
+    "file": "corpora/random32-p010.g6"
+  },
+  {
+    "name": "random32-p050",
+    "description": "1024 independent G(32, 0.5) labelled graphs",
+    "graphs": 1024,
+    "orders": [
+      32
+    ],
+    "seed": 1729,
+    "sha256": "58aab455959dd57fcbb174403fe687847ab36e1655faa61e7ab9e12c1e13b7b0",
+    "file": "corpora/random32-p050.g6"
+  },
+  {
+    "name": "cycles32",
+    "description": "Seeded relabellings of the cycle C32",
+    "graphs": 64,
+    "orders": [
+      32
+    ],
+    "seed": 1729,
+    "sha256": "72130da41fcb6e47f0facd61b1d198e83ef28cc6a88ffe57977bffda723557a3",
+    "file": "corpora/cycles32.g6"
+  },
+  {
+    "name": "hypercubes32",
+    "description": "Seeded relabellings of the 5-dimensional hypercube",
+    "graphs": 64,
+    "orders": [
+      32
+    ],
+    "seed": 1729,
+    "sha256": "749c9b12851554c90f1e19877193620cc61aead8302a395a495fc8616a47ffd8",
+    "file": "corpora/hypercubes32.g6"
+  },
+  {
+    "name": "rook-shrikhande16",
+    "description": "Alternating seeded relabellings of the 4x4 rook and Shrikhande graphs",
+    "graphs": 64,
+    "orders": [
+      16
+    ],
+    "seed": 1729,
+    "sha256": "b792164b5d5864584a074f582add8d33bafd7f478d3e335ec713295c9be4517d",
+    "file": "corpora/rook-shrikhande16.g6"
+  },
+  {
+    "name": "clique-empty32",
+    "description": "Alternating empty and complete graphs of order 32",
+    "graphs": 64,
+    "orders": [
+      32
+    ],
+    "seed": 1729,
+    "sha256": "310bd4539344f80a358dc3a8973f7cbba084d0dee51b6733e72f9bcc30fc5620",
+    "file": "corpora/clique-empty32.g6"
+  }
+]

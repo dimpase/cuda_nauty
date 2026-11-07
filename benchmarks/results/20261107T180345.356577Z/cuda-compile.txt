@@ -1,0 +1,47 @@
+Sat Nov  7 18:01:05 UTC 2026
+nvcc: NVIDIA (R) Cuda compiler driver
+Copyright (c) 2005-2025 NVIDIA Corporation
+Built on Tue_May_27_02:25:41_PDT_2025
+Cuda compilation tools, release 12.9, V12.9.86
+Build cuda_12.9.r12.9/compiler.36037853_0
+-- CUDA executable enabled; architectures: 80
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: /home/admin/nauty-cuda-validation/build
+Change Dir: '/home/admin/nauty-cuda-validation/build'
+
+Run Build Command(s): /home/linuxbrew/.linuxbrew/bin/ninja -v -j 2
+[1/9] /usr/bin/g++  -I/home/admin/nauty-cuda-validation/shared/nauty-source/include -O3 -DNDEBUG -std=c++17 -MD -MT CMakeFiles/nauty-canonical-core-test.dir/tests/core.cpp.o -MF CMakeFiles/nauty-canonical-core-test.dir/tests/core.cpp.o.d -o CMakeFiles/nauty-canonical-core-test.dir/tests/core.cpp.o -c /home/admin/nauty-cuda-validation/shared/nauty-source/tests/core.cpp
+[2/9] /usr/bin/g++  -I/home/admin/nauty-cuda-validation/shared/nauty-source/include -isystem /home/linuxbrew/.linuxbrew/Cellar/nauty/2.9.3/include/nauty -O3 -DNDEBUG -std=c++17 -MD -MT CMakeFiles/nauty-benchmark-cpu.dir/src/benchmark_cpu.cpp.o -MF CMakeFiles/nauty-benchmark-cpu.dir/src/benchmark_cpu.cpp.o.d -o CMakeFiles/nauty-benchmark-cpu.dir/src/benchmark_cpu.cpp.o -c /home/admin/nauty-cuda-validation/shared/nauty-source/src/benchmark_cpu.cpp
+[3/9] /home/admin/nauty-cuda-validation/cuda-12.9.1/bin/nvcc -forward-unknown-to-host-compiler  -I/home/admin/nauty-cuda-validation/shared/nauty-source/include -Xptxas=-v -Xcompiler=-Wall,-Wextra,-Wconversion,-Werror -O3 -DNDEBUG -std=c++17 "--generate-code=arch=compute_80,code=[compute_80,sm_80]" -MD -MT CMakeFiles/nauty-canonical-cuda.dir/src/cuda_main.cu.o -MF CMakeFiles/nauty-canonical-cuda.dir/src/cuda_main.cu.o.d -x cu -c /home/admin/nauty-cuda-validation/shared/nauty-source/src/cuda_main.cu -o CMakeFiles/nauty-canonical-cuda.dir/src/cuda_main.cu.o
+ptxas info    : 0 bytes gmem
+ptxas info    : Compiling entry function '_ZN41_GLOBAL__N__d4c747c3_12_cuda_main_cu_main18canonicalize_batchEPKN10nauty_cuda5GraphEPNS0_6ResultEmm' for 'sm_80'
+ptxas info    : Function properties for _ZN41_GLOBAL__N__d4c747c3_12_cuda_main_cu_main18canonicalize_batchEPKN10nauty_cuda5GraphEPNS0_6ResultEmm
+    6176 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 78 registers, used 0 barriers, 6176 bytes cumulative stack size, 384 bytes cmem[0]
+ptxas info    : Compile time = 21.852 ms
+[4/9] : && /usr/bin/g++ -O3 -DNDEBUG -Wl,--dependency-file=CMakeFiles/nauty-canonical-cpu.dir/link.d CMakeFiles/nauty-canonical-cpu.dir/src/cpu_main.cpp.o -o nauty-canonical-cpu   && :
+[5/9] : && /usr/bin/g++ -O3 -DNDEBUG -Wl,--dependency-file=CMakeFiles/nauty-benchmark-cpu.dir/link.d CMakeFiles/nauty-benchmark-cpu.dir/src/benchmark_cpu.cpp.o -o nauty-benchmark-cpu  -Wl,-rpath,/home/linuxbrew/.linuxbrew/Cellar/nauty/2.9.3/lib  /home/linuxbrew/.linuxbrew/Cellar/nauty/2.9.3/lib/libnauty.so && :
+[6/9] : && /usr/bin/g++ -O3 -DNDEBUG -Wl,--dependency-file=CMakeFiles/nauty-canonical-core-test.dir/link.d CMakeFiles/nauty-canonical-core-test.dir/tests/core.cpp.o -o nauty-canonical-core-test   && :
+[7/9] : && /usr/bin/g++  CMakeFiles/nauty-canonical-cuda.dir/src/cuda_main.cu.o -o nauty-canonical-cuda  -lcudadevrt  -lcudart_static  -lrt  -lpthread  -ldl -L"/home/admin/nauty-cuda-validation/cuda-12.9.1/lib64/stubs" -L"/home/admin/nauty-cuda-validation/cuda-12.9.1/lib64" && :
+[8/9] /home/admin/nauty-cuda-validation/cuda-12.9.1/bin/nvcc -forward-unknown-to-host-compiler  -I/home/admin/nauty-cuda-validation/shared/nauty-source/include -Xptxas=-v -Xcompiler=-Wall,-Wextra,-Wconversion,-Werror -O3 -DNDEBUG -std=c++17 "--generate-code=arch=compute_80,code=[compute_80,sm_80]" -MD -MT CMakeFiles/nauty-benchmark-cuda.dir/src/benchmark_cuda.cu.o -MF CMakeFiles/nauty-benchmark-cuda.dir/src/benchmark_cuda.cu.o.d -x cu -c /home/admin/nauty-cuda-validation/shared/nauty-source/src/benchmark_cuda.cu -o CMakeFiles/nauty-benchmark-cuda.dir/src/benchmark_cuda.cu.o
+ptxas info    : 0 bytes gmem
+ptxas info    : Compiling entry function '_ZN46_GLOBAL__N__c46d1bd5_17_benchmark_cuda_cu_main18canonicalize_batchEPKN10nauty_cuda5GraphEPNS0_6ResultEmm' for 'sm_80'
+ptxas info    : Function properties for _ZN46_GLOBAL__N__c46d1bd5_17_benchmark_cuda_cu_main18canonicalize_batchEPKN10nauty_cuda5GraphEPNS0_6ResultEmm
+    6176 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 78 registers, used 0 barriers, 6176 bytes cumulative stack size, 384 bytes cmem[0]
+ptxas info    : Compile time = 19.968 ms
+[9/9] : && /usr/bin/g++  CMakeFiles/nauty-benchmark-cuda.dir/src/benchmark_cuda.cu.o -o nauty-benchmark-cuda  -lcudadevrt  -lcudart_static  -lrt  -lpthread  -ldl -L"/home/admin/nauty-cuda-validation/cuda-12.9.1/lib64/stubs" -L"/home/admin/nauty-cuda-validation/cuda-12.9.1/lib64" && :
+
+PASS ['--repeats', '0']: --repeats is out of range
+PASS ['--loops', '0']: --loops is out of range
+PASS ['--batch-size', '0']: --batch-size is out of range
+PASS []: benchmark requires at least one graph
+PASS []: input line 1: invalid graph6 character
+PASS ['--repeats', '1', '--warmup', '0', '--loops', '2']: CUDA benchmark unavailable: CUDA driver version is insufficient for CUDA runtime version
+PASS help and six rejection checks; no CUDA timings reported
+c9f4b3a014bbd669fc2e53aa3dd4b508489153ff346b59ff0e2634b63d97d65c  CMakeLists.txt
+10ffad382d43af809700f26af4c81cb9c92113cf4a71aa078d6bf3fc90e47c9e  include/canonical.hpp
+0b85114eb215e20e3fb914493ec9ec823498114d75c1e7ba93081f0976eab215  src/cli_common.hpp
+0c3e5ce8050d461766618649a7f58aa8d526d53d85a10f30a3e0eef20d7585d2  src/benchmark_cuda.cu
+CUDA benchmark compiled; no-GPU/CLI rejection paths checked. GPU timings were not measured.

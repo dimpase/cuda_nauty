@@ -1,0 +1,2 @@
+dataset,backend,status,graphs,loops,operations,median_seconds,microseconds_per_graph,graphs_per_second,speedup_vs_prototype_cpu,speedup_vs_nauty_cpu,speedup_vs_traces_cpu,kernel_microseconds_per_graph,checksum,cpu_checksum_verified,below_target,error
+cycles32,traces,ok,64,2494,159616,0.25712925,1.6109240301724137,620761.7375308333,,,1.0,,ba0942c90c86f725,,True,

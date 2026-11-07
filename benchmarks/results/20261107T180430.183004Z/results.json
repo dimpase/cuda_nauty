@@ -1,0 +1,269 @@
+{
+  "schema_version": 1,
+  "created_utc": "20261107T180430.183004Z",
+  "host": {
+    "platform": "macOS-27.2-arm64-arm-64bit-Mach-O",
+    "machine": "arm64",
+    "logical_cpus": 14,
+    "python": "3.15.2 (main, Oct 25 2026, 16:57:51) [Clang 21.0.0 (clang-2100.3.34.2)]",
+    "load_average_before": [
+      2.12109375,
+      2.18115234375,
+      1.88134765625
+    ],
+    "load_average_after": [
+      2.12109375,
+      2.18115234375,
+      1.88134765625
+    ]
+  },
+  "protocol": {
+    "cpu_threads": 1,
+    "repeats": 5,
+    "warmup": 1,
+    "target_seconds": 0.3,
+    "max_nodes": 1000000,
+    "batch_size": 4096,
+    "max_total_seconds": 110,
+    "seed": 1729,
+    "scope": "C++ core timers; no generation, parsing, startup, or JSON I/O",
+    "cuda_primary_scope": "host H2D + kernel + D2H; kernel-only reported separately",
+    "cuda_correctness": "base-corpus FNV-1a checksum of n and canonical rows must match prototype CPU",
+    "normalization": "median trial seconds / (base corpus graphs * loops)"
+  },
+  "binaries": {
+    "cpu": {
+      "path": "/Users/dima/software/nauty-cuda/build/nauty-benchmark-cpu",
+      "sha256": "7379526705aa3a25c3fc4cddfe37363e3e8c9932a790f614b2df6cd775326a25"
+    },
+    "cuda": null,
+    "geng": {
+      "path": "/opt/homebrew/Cellar/nauty/2.9.3/bin/geng",
+      "sha256": "ad2f68adf733dbed7cad543841cfa329740596ee5cd136f17a0a17f6e744f5ad"
+    }
+  },
+  "sources": {
+    "description": "Current source snapshot; binary hashes identify the measured executables",
+    "sha256": {
+      "CMakeLists.txt": "c9f4b3a014bbd669fc2e53aa3dd4b508489153ff346b59ff0e2634b63d97d65c",
+      "benchmarks/run.py": "645291f6b8d720b7743e1f6bde5872ed1fad00d90d3c995d96936f4fb5451ef9",
+      "include/canonical.hpp": "10ffad382d43af809700f26af4c81cb9c92113cf4a71aa078d6bf3fc90e47c9e",
+      "src/benchmark_cpu.cpp": "f15846b08f8c422c12992904a13640dafa62a45014deed8dde6ad88208db4583",
+      "src/benchmark_cuda.cu": "0c3e5ce8050d461766618649a7f58aa8d526d53d85a10f30a3e0eef20d7585d2",
+      "src/cli_common.hpp": "0b85114eb215e20e3fb914493ec9ec823498114d75c1e7ba93081f0976eab215",
+      "src/cpu_main.cpp": "018a0c3c028540cca8241ddf06820a7cae7925f92ebc9eef37be075bc4d85c17",
+      "src/cuda_main.cu": "ee79304ed3dff6681efb410e5aba3daf1befb6fed944877ba0bf778440f11f87",
+      "tests/validate.py": "afed277e084b7f60b66d660e78be7edf655a6d06dc8c853423c5999e7a95ec0f"
+    },
+    "git_head": "f5cb001f9d6736d8196a3360bc4d6fe3b6c23059",
+    "git_status": "?? benchmarks/results/"
+  },
+  "builds": {
+    "cpu": {
+      "status": "available",
+      "directory": "/Users/dima/software/nauty-cuda/build",
+      "cmake_cache": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_CUDA_COMPILER": "NOTFOUND",
+        "CMAKE_CXX_COMPILER": "/usr/bin/c++",
+        "CMAKE_CXX_FLAGS": "",
+        "CMAKE_CXX_FLAGS_DEBUG": "-g",
+        "CMAKE_CXX_FLAGS_MINSIZEREL": "-Os -DNDEBUG",
+        "CMAKE_CXX_FLAGS_RELEASE": "-O3 -DNDEBUG",
+        "CMAKE_CXX_FLAGS_RELWITHDEBINFO": "-O2 -g -DNDEBUG",
+        "CMAKE_EXE_LINKER_FLAGS": "",
+        "CMAKE_EXE_LINKER_FLAGS_DEBUG": "",
+        "CMAKE_EXE_LINKER_FLAGS_MINSIZEREL": "",
+        "CMAKE_EXE_LINKER_FLAGS_RELEASE": "",
+        "CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO": "",
+        "CMAKE_OSX_ARCHITECTURES": "",
+        "CMAKE_OSX_DEPLOYMENT_TARGET": "",
+        "CMAKE_OSX_SYSROOT": "",
+        "NAUTY_CUDA_BUILD_BENCHMARKS": "ON",
+        "NAUTY_CUDA_ENABLE_CUDA": "OFF",
+        "NAUTY_CUDA_REQUIRE_CUDA": "OFF",
+        "CMAKE_CACHE_MAJOR_VERSION": "4",
+        "CMAKE_CACHE_MINOR_VERSION": "4",
+        "CMAKE_CACHE_PATCH_VERSION": "5",
+        "CMAKE_GENERATOR": "Unix Makefiles",
+        "CMAKE_GENERATOR_INSTANCE": "",
+        "CMAKE_GENERATOR_PLATFORM": "",
+        "CMAKE_GENERATOR_TOOLSET": "",
+        "NAUTY_CFLAGS": "-I/opt/homebrew/Cellar/nauty/2.9.3/include/nauty",
+        "NAUTY_CFLAGS_I": "",
+        "NAUTY_CFLAGS_OTHER": "",
+        "NAUTY_FOUND": "1",
+        "NAUTY_INCLUDEDIR": "/opt/homebrew/Cellar/nauty/2.9.3/include/nauty",
+        "NAUTY_INCLUDE_DIRS": "/opt/homebrew/Cellar/nauty/2.9.3/include/nauty",
+        "NAUTY_LDFLAGS": "-L/opt/homebrew/Cellar/nauty/2.9.3/lib;-lnauty",
+        "NAUTY_LDFLAGS_OTHER": "",
+        "NAUTY_LIBDIR": "/opt/homebrew/Cellar/nauty/2.9.3/lib",
+        "NAUTY_LIBRARIES": "nauty",
+        "NAUTY_LIBRARY_DIRS": "/opt/homebrew/Cellar/nauty/2.9.3/lib",
+        "NAUTY_LIBS": "",
+        "NAUTY_LIBS_L": "",
+        "NAUTY_LIBS_OTHER": "",
+        "NAUTY_LIBS_PATHS": "",
+        "NAUTY_MODULE_NAME": "libnauty",
+        "NAUTY_PREFIX": "/opt/homebrew/Cellar/nauty/2.9.3",
+        "NAUTY_STATIC_CFLAGS": "-I/opt/homebrew/Cellar/nauty/2.9.3/include/nauty",
+        "NAUTY_STATIC_CFLAGS_I": "",
+        "NAUTY_STATIC_CFLAGS_OTHER": "",
+        "NAUTY_STATIC_INCLUDE_DIRS": "/opt/homebrew/Cellar/nauty/2.9.3/include/nauty",
+        "NAUTY_STATIC_LDFLAGS": "-L/opt/homebrew/Cellar/nauty/2.9.3/lib;-lnauty",
+        "NAUTY_STATIC_LDFLAGS_OTHER": "",
+        "NAUTY_STATIC_LIBDIR": "",
+        "NAUTY_STATIC_LIBRARIES": "nauty",
+        "NAUTY_STATIC_LIBRARY_DIRS": "/opt/homebrew/Cellar/nauty/2.9.3/lib",
+        "NAUTY_STATIC_LIBS": "",
+        "NAUTY_STATIC_LIBS_L": "",
+        "NAUTY_STATIC_LIBS_OTHER": "",
+        "NAUTY_STATIC_LIBS_PATHS": "",
+        "NAUTY_VERSION": "2.9.3",
+        "NAUTY_libnauty_INCLUDEDIR": "",
+        "NAUTY_libnauty_LIBDIR": "",
+        "NAUTY_libnauty_PREFIX": "",
+        "NAUTY_libnauty_VERSION": ""
+      },
+      "compiler": {
+        "CMAKE_CXX_COMPILER": "/usr/bin/c++",
+        "CMAKE_CXX_COMPILER_ID": "AppleClang",
+        "CMAKE_CXX_COMPILER_VERSION": "21.0.0.21000401",
+        "CMAKE_CXX_STANDARD_COMPUTED_DEFAULT": "14"
+      },
+      "target_flags": "# CMAKE generated file: DO NOT EDIT!\n# Generated by \"Unix Makefiles\" Generator, CMake Version 4.4\n\n# compile CXX with /usr/bin/c++\nCXX_DEFINES = \n\nCXX_INCLUDES = -I/Users/dima/software/nauty-cuda/include -isystem /opt/homebrew/Cellar/nauty/2.9.3/include/nauty\n\nCXX_FLAGS = -O3 -DNDEBUG -std=c++17\n\n"
+    },
+    "cuda": null
+  },
+  "corpora": [
+    {
+      "name": "cycles32",
+      "description": "Seeded relabellings of the cycle C32",
+      "graphs": 64,
+      "orders": [
+        32
+      ],
+      "seed": 1729,
+      "sha256": "72130da41fcb6e47f0facd61b1d198e83ef28cc6a88ffe57977bffda723557a3",
+      "file": "corpora/cycles32.g6"
+    }
+  ],
+  "measurements": [
+    {
+      "dataset": "cycles32",
+      "backend": "traces",
+      "graphs": 64,
+      "corpus_sha256": "72130da41fcb6e47f0facd61b1d198e83ef28cc6a88ffe57977bffda723557a3",
+      "calibration": {
+        "command": [
+          "build/nauty-benchmark-cpu",
+          "--backend",
+          "traces",
+          "--repeats",
+          "1",
+          "--warmup",
+          "1",
+          "--loops",
+          "1",
+          "--max-nodes",
+          "1000000"
+        ],
+        "returncode": 0,
+        "stderr": "",
+        "summary": {
+          "status": "ok",
+          "backend": "traces",
+          "device": "cpu",
+          "threads": 1,
+          "library_version": "2.9.3 (64 bits)",
+          "graphs": 64,
+          "loops": 1,
+          "operations": 64,
+          "completed": 64,
+          "completed_operations": 64,
+          "incomplete_operations": 0,
+          "error_operations": 0,
+          "repeats": 1,
+          "warmup": 1,
+          "max_nodes": 1000000,
+          "node_limit_applied": false,
+          "nodes": 64,
+          "max_nodes_observed": 1,
+          "trials_seconds": [
+            0.000138333
+          ],
+          "median_seconds": 0.000138333,
+          "graphs_per_second": 462651.7172330536,
+          "checksum": "ba0942c90c86f725"
+        },
+        "status": "ok"
+      },
+      "loops": 2494,
+      "run": {
+        "command": [
+          "build/nauty-benchmark-cpu",
+          "--backend",
+          "traces",
+          "--repeats",
+          "5",
+          "--warmup",
+          "1",
+          "--loops",
+          "2494",
+          "--max-nodes",
+          "1000000"
+        ],
+        "returncode": 0,
+        "stderr": "",
+        "summary": {
+          "status": "ok",
+          "backend": "traces",
+          "device": "cpu",
+          "threads": 1,
+          "library_version": "2.9.3 (64 bits)",
+          "graphs": 64,
+          "loops": 2494,
+          "operations": 159616,
+          "completed": 64,
+          "completed_operations": 159616,
+          "incomplete_operations": 0,
+          "error_operations": 0,
+          "repeats": 5,
+          "warmup": 1,
+          "max_nodes": 1000000,
+          "node_limit_applied": false,
+          "nodes": 159616,
+          "max_nodes_observed": 1,
+          "trials_seconds": [
+            0.259311208,
+            0.257420375,
+            0.255676375,
+            0.25712925,
+            0.255024209
+          ],
+          "median_seconds": 0.25712925,
+          "graphs_per_second": 620761.7375308333,
+          "checksum": "ba0942c90c86f725"
+        },
+        "status": "ok"
+      },
+      "status": "ok",
+      "checksum": "ba0942c90c86f725",
+      "operations": 159616,
+      "median_seconds": 0.25712925,
+      "microseconds_per_graph": 1.6109240301724137,
+      "graphs_per_second": 620761.7375308333,
+      "trial_microseconds_per_graph": [
+        1.6245940757818766,
+        1.6127479388031274,
+        1.6018217158680834,
+        1.6109240301724137,
+        1.5977358723436248
+      ],
+      "below_target": true,
+      "speedup_vs_traces_cpu": 1.0
+    }
+  ],
+  "cuda_status": "NOT MEASURED (no --cuda executable supplied)",
+  "elapsed_timing_seconds": 1.5516014999593608
+}

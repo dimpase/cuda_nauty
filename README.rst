@@ -146,6 +146,10 @@ longer runs. CUDA speedup is unmeasured until such a run succeeds.
 Performance status and next steps
 ---------------------------------
 
+The `initial timing report <benchmarks/RESULTS.rst>`_ records seven CPU
+workloads against nauty and Traces, with raw samples and reproducible corpora.
+CUDA speedup remains unmeasured.
+
 Verified during development on 2026-11-07:
 
 * 55,636 valid CPU inputs passed class/witness checks against nauty 2.9.3:

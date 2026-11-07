@@ -1,0 +1,11 @@
+Canonical labelling timings: single-threaded CPU baselines
+Workstation timings; background processes were not controlled.
+Core timers exclude generation, graph6 parsing, startup, and JSON I/O.
+CUDA primary times include H2D + kernel + D2H; kernel-only times are separate.
+CUDA comparisons require a matching prototype CPU canonical-result checksum.
+Loop counts may differ by backend; all rates use graphs * loops.
+CUDA: NOT MEASURED (no --cuda executable supplied)
+
+dataset                backend    status              loops   ms/trial    us/graph  vs proto
+cycles32               traces     ok                   2494    257.129       1.611         -
+  Trial duration fell below the calibration target; interpret small differences cautiously.
