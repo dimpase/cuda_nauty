@@ -264,7 +264,7 @@ def write_results(report, destination):
                "speedup_vs_nauty_cpu", "speedup_vs_traces_cpu",
                "kernel_microseconds_per_graph", "checksum", "cpu_checksum_verified", "below_target", "error"]
     with (destination / "summary.csv").open("w", newline="") as stream:
-        writer = csv.DictWriter(stream, fieldnames=columns, extrasaction="ignore")
+        writer = csv.DictWriter(stream, fieldnames=columns, extrasaction="ignore", lineterminator="\n")
         writer.writeheader()
         writer.writerows(report["measurements"])
     lines = [
