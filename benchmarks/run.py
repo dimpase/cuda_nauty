@@ -4,11 +4,13 @@
 Run from the project root after building the benchmark targets:
     python3 benchmarks/run.py --cpu build/nauty-benchmark-cpu
     python3 benchmarks/run.py --cpu build/nauty-benchmark-cpu --cuda build/nauty-benchmark-cuda
+    python3 benchmarks/run.py --cpu build/nauty-benchmark-cpu --metal build/nauty-benchmark-metal
 
 The C++ executables time canonicalization of already parsed graphs.  This
 driver does not time graph generation, parsing, process startup, or JSON I/O.
-CPU measurements use one thread, not the whole machine.  CUDA measurements,
-when explicitly requested, include transfers and report kernel time separately.
+CPU measurements use one thread, not the whole machine.  GPU measurements
+include host copies and synchronization. CUDA kernel time and Metal GPU command
+duration are reported separately from their host timings.
 """
 
 import argparse
@@ -36,6 +38,8 @@ DATASETS = (
     "geng8", "random32-p010", "random32-p050", "cycles32", "hypercubes32",
     "rook-shrikhande16", "clique-empty32",
 )
+GPU_BACKENDS = ("cuda", "metal")
+GPU_LABELS = {"cuda": "CUDA", "metal": "Metal"}
 
 
 def helpers():
@@ -103,10 +107,10 @@ def generate_corpus(name, options, helper):
 
 
 def command_for(backend, options, repeats, warmup, loops):
-    command = [options.cuda] if backend == "cuda" else [options.cpu, "--backend", backend]
+    command = [getattr(options, backend)] if backend in GPU_BACKENDS else [options.cpu, "--backend", backend]
     command += ["--repeats", str(repeats), "--warmup", str(warmup),
                 "--loops", str(loops), "--max-nodes", str(options.max_nodes)]
-    if backend == "cuda":
+    if backend in GPU_BACKENDS:
         command += ["--batch-size", str(options.batch_size)]
     return command
 
@@ -122,10 +126,10 @@ def check_summary(summary, corpus, backend, repeats, warmup, loops, options):
         raise ValueError("benchmark reported a different repeat or warmup count")
     if summary.get("max_nodes") != options.max_nodes:
         raise ValueError("benchmark reported a different node budget")
-    if backend != "cuda" and summary.get("threads") != 1:
+    if backend not in GPU_BACKENDS and summary.get("threads") != 1:
         raise ValueError("CPU benchmark must use one thread")
-    if backend == "cuda" and summary.get("batch_size") != options.batch_size:
-        raise ValueError("CUDA benchmark reported a different batch size")
+    if backend in GPU_BACKENDS and summary.get("batch_size") != options.batch_size:
+        raise ValueError(f"{GPU_LABELS[backend]} benchmark reported a different batch size")
     if summary.get("graphs") != corpus["graphs"] or summary.get("completed") != corpus["graphs"]:
         raise ValueError("benchmark did not complete the entire base corpus")
     if summary.get("loops") != loops:
@@ -145,15 +149,15 @@ def check_summary(summary, corpus, backend, repeats, warmup, loops, options):
         raise ValueError("benchmark returned an invalid median")
     if not math.isclose(median, statistics.median(trials), rel_tol=1e-5, abs_tol=1e-12):
         raise ValueError("reported median does not match the trial times")
-    if backend == "cuda" or "kernel_trials_seconds" in summary:
+    if backend in GPU_BACKENDS or "kernel_trials_seconds" in summary:
         kernel = summary.get("kernel_trials_seconds")
         if not isinstance(kernel, list) or len(kernel) != repeats:
-            raise ValueError("incorrect number of CUDA kernel trials")
+            raise ValueError("incorrect number of GPU timing trials")
         if any(type(value) not in (int, float) or not math.isfinite(value) or value <= 0 for value in kernel):
-            raise ValueError("invalid CUDA kernel times")
+            raise ValueError("invalid GPU times")
         if not math.isclose(summary.get("kernel_median_seconds", -1), statistics.median(kernel),
                             rel_tol=1e-5, abs_tol=1e-12):
-            raise ValueError("reported kernel median does not match the kernel trials")
+            raise ValueError("reported GPU median does not match the GPU trials")
 
 
 def invoke(command, payload, corpus, backend, repeats, warmup, loops, options, deadline):
@@ -175,7 +179,10 @@ def invoke(command, payload, corpus, backend, repeats, warmup, loops, options, d
         summary = json.loads(result.stdout)
         record["summary"] = summary
     except json.JSONDecodeError:
-        record.update(status="benchmark_error", error="benchmark did not return a JSON summary",
+        reason = "benchmark did not return a JSON summary"
+        if result.returncode != 0 and result.stderr.strip():
+            reason = f"benchmark exited {result.returncode}: {result.stderr.strip()[-4000:]}"
+        record.update(status="benchmark_error", error=reason,
                       stdout=result.stdout[-16000:])
         return record
     if result.returncode != 0:
@@ -195,12 +202,12 @@ def invoke(command, payload, corpus, backend, repeats, warmup, loops, options, d
 def measure(backend, payload, corpus, options, deadline, reference_checksum=None):
     measurement = {"dataset": corpus["name"], "backend": backend,
                    "graphs": corpus["graphs"], "corpus_sha256": corpus["sha256"]}
-    if backend == "cuda":
+    if backend in GPU_BACKENDS:
         measurement["cpu_reference_checksum"] = reference_checksum
         measurement["cpu_checksum_verified"] = False
         if reference_checksum is None:
             measurement.update(status="cpu_reference_unavailable",
-                               error="complete prototype CPU result required before CUDA timing")
+                               error=f"complete prototype CPU result required before {GPU_LABELS[backend]} timing")
             return measurement
     pilot = invoke(command_for(backend, options, 1, options.warmup, 1), payload, corpus,
                    backend, 1, options.warmup, 1, options, deadline)
@@ -209,9 +216,9 @@ def measure(backend, payload, corpus, options, deadline, reference_checksum=None
         measurement.update(status=pilot["status"], error="calibration: " + pilot.get("error", "failed"))
         return measurement
     pilot_checksum = pilot["summary"]["checksum"]
-    if backend == "cuda" and pilot_checksum != reference_checksum:
+    if backend in GPU_BACKENDS and pilot_checksum != reference_checksum:
         measurement.update(status="checksum_mismatch",
-                           error="CUDA calibration checksum differs from prototype CPU; timings rejected")
+                           error=f"{GPU_LABELS[backend]} calibration checksum differs from prototype CPU; timings rejected")
         return measurement
     pilot_seconds = pilot["summary"]["median_seconds"]
     loops = min(options.max_loops, max(1, math.ceil(1.15 * options.target_seconds / pilot_seconds)))
@@ -229,7 +236,7 @@ def measure(backend, payload, corpus, options, deadline, reference_checksum=None
                            error="timed checksum differs from calibration; timings rejected")
         return measurement
     measurement["checksum"] = summary["checksum"]
-    if backend == "cuda":
+    if backend in GPU_BACKENDS:
         measurement["cpu_checksum_verified"] = True
     operations = corpus["graphs"] * loops
     measurement.update(
@@ -251,9 +258,9 @@ def number(value, precision=3):
 
 def write_results(report, destination):
     cpu = {(row["dataset"], row["backend"]): row["microseconds_per_graph"]
-           for row in report["measurements"] if row["backend"] != "cuda" and row["status"] == "ok"}
+           for row in report["measurements"] if row["backend"] not in GPU_BACKENDS and row["status"] == "ok"}
     for row in report["measurements"]:
-        if row["status"] == "ok" and (row["backend"] != "cuda" or row.get("cpu_checksum_verified")):
+        if row["status"] == "ok" and (row["backend"] not in GPU_BACKENDS or row.get("cpu_checksum_verified")):
             for backend in ("prototype", "nauty", "traces"):
                 baseline = cpu.get((row["dataset"], backend))
                 if baseline is not None:
@@ -272,9 +279,11 @@ def write_results(report, destination):
         "Workstation timings; background processes were not controlled.",
         "Core timers exclude generation, graph6 parsing, startup, and JSON I/O.",
         "CUDA primary times include H2D + kernel + D2H; kernel-only times are separate.",
-        "CUDA comparisons require a matching prototype CPU canonical-result checksum.",
+        "Metal primary times include command creation, input/output memcpy, dispatch and synchronization; GPU command time is separate.",
+        "GPU comparisons require a matching prototype CPU canonical-result checksum.",
         "Loop counts may differ by backend; all rates use graphs * loops.",
         f"CUDA: {report['cuda_status']}",
+        f"Metal: {report.get('metal_status', 'NOT REQUESTED')}",
         "",
         f"{'dataset':<22} {'backend':<10} {'status':<17} {'loops':>7} {'ms/trial':>10} {'us/graph':>11} {'vs proto':>9}",
     ]
@@ -289,7 +298,8 @@ def write_results(report, destination):
         if row.get("error"):
             lines.append("  " + row["error"])
         if "kernel_microseconds_per_graph" in row:
-            lines.append(f"  CUDA kernel only: {row['kernel_microseconds_per_graph']:.3f} us/graph; "
+            scope = "Metal GPU command" if row["backend"] == "metal" else "CUDA kernel only"
+            lines.append(f"  {scope}: {row['kernel_microseconds_per_graph']:.3f} us/graph; "
                          f"transfer-inclusive speedup vs nauty CPU: {number(row.get('speedup_vs_nauty_cpu'), 2)}; "
                          f"vs Traces CPU: {number(row.get('speedup_vs_traces_cpu'), 2)}.")
         if row.get("below_target"):
@@ -321,7 +331,7 @@ def source_info():
     paths = {ROOT / "CMakeLists.txt", Path(__file__).resolve(), ROOT / "tests" / "validate.py"}
     for directory in ("src", "include"):
         paths.update(path for path in (ROOT / directory).rglob("*")
-                     if path.is_file() and path.suffix in (".c", ".cpp", ".cu", ".h", ".hpp", ".cuh"))
+                     if path.is_file() and path.suffix in (".c", ".cpp", ".cu", ".h", ".hpp", ".cuh", ".mm", ".metal", ".in"))
     result = {"description": "Current source snapshot; binary hashes identify the measured executables",
               "sha256": {str(path.relative_to(ROOT)): hashlib.sha256(path.read_bytes()).hexdigest()
                          for path in sorted(paths)}}
@@ -350,12 +360,12 @@ def build_info(executable):
         match = re.match(r"([^/#][^:]*):[^=]*=(.*)", line)
         if match:
             key, value = match.groups()
-            if key.startswith(("CMAKE_CXX_", "CMAKE_CUDA_", "CMAKE_EXE_LINKER_FLAGS", "CMAKE_OSX_",
+            if key.startswith(("CMAKE_CXX_", "CMAKE_CUDA_", "CMAKE_OBJCXX_", "CMAKE_EXE_LINKER_FLAGS", "CMAKE_OSX_",
                                "CMAKE_GENERATOR", "CMAKE_CACHE_", "NAUTY_")) or key == "CMAKE_BUILD_TYPE":
                 if not key.endswith("-ADVANCED"):
                     cache[key] = value
     compiler = {}
-    for language in ("CXX", "CUDA"):
+    for language in ("CXX", "CUDA", "OBJCXX"):
         for path in sorted((build / "CMakeFiles").glob(f"*/CMake{language}Compiler.cmake")):
             for key in ("COMPILER", "COMPILER_ID", "COMPILER_VERSION", "COMPILER_TARGET", "STANDARD_COMPUTED_DEFAULT"):
                 name = f"CMAKE_{language}_{key}"
@@ -381,7 +391,8 @@ def build_info(executable):
 def parse_args():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--cpu", default=str(ROOT / "build" / "nauty-benchmark-cpu"))
-    parser.add_argument("--cuda", help="optional CUDA timing executable; no GPU estimate is made when omitted")
+    parser.add_argument("--cuda", help="optional CUDA timing executable; no CUDA estimate is made when omitted")
+    parser.add_argument("--metal", help="optional Metal timing executable; no Metal estimate is made when omitted")
     parser.add_argument("--geng", default=find_tool("geng"))
     parser.add_argument("--output-dir", type=Path, help="default: benchmarks/results/<UTC timestamp>")
     parser.add_argument("--datasets", nargs="+", choices=DATASETS, default=list(DATASETS))
@@ -400,8 +411,9 @@ def parse_args():
     parser.add_argument("--max-total-seconds", type=float, default=110,
                         help="overall timing budget, including calibration (default: 110)")
     options = parser.parse_args()
-    if options.cuda and "prototype" not in options.backends:
-        parser.error("--cuda requires prototype in --backends for CPU/CUDA result verification")
+    for backend in GPU_BACKENDS:
+        if getattr(options, backend) and "prototype" not in options.backends:
+            parser.error(f"--{backend} requires prototype in --backends for CPU/{GPU_LABELS[backend]} result verification")
     for name in ("random_count", "symmetric_count", "repeats", "max_nodes", "batch_size", "max_loops"):
         if getattr(options, name) < 1:
             parser.error(name.replace("_", "-") + " must be positive")
@@ -431,18 +443,23 @@ def main():
                      "scope": "C++ core timers; no generation, parsing, startup, or JSON I/O",
                      "cuda_primary_scope": "host H2D + kernel + D2H; kernel-only reported separately",
                      "cuda_correctness": "base-corpus FNV-1a checksum of n and canonical rows must match prototype CPU",
+                     "metal_primary_scope": "host command/encoder creation + input/output memcpy + encode + dispatch + wait; Metal GPU command duration reported separately",
+                     "metal_correctness": "base-corpus FNV-1a checksum of n and canonical rows must match prototype CPU",
                      "normalization": "median trial seconds / (base corpus graphs * loops)"},
-        "binaries": {"cpu": binary_info(options.cpu), "cuda": binary_info(options.cuda),
+        "binaries": {"cpu": binary_info(options.cpu), "cuda": binary_info(options.cuda), "metal": binary_info(options.metal),
                      "geng": binary_info(options.geng)},
         "sources": source_info(),
-        "builds": {"cpu": build_info(options.cpu), "cuda": build_info(options.cuda)},
+        "builds": {"cpu": build_info(options.cpu), "cuda": build_info(options.cuda), "metal": build_info(options.metal)},
         "corpora": [], "measurements": [],
         "cuda_status": "requested, not measured yet" if options.cuda else "NOT MEASURED (no --cuda executable supplied)",
+        "metal_status": "requested, not measured yet" if options.metal else "NOT MEASURED (no --metal executable supplied)",
     }
     print(f"Results: {destination}", flush=True)
     print("CPU measurements are single-threaded; other CPU/GPU workloads should be idle.", flush=True)
-    if not options.cuda:
-        print("CUDA NOT MEASURED: no --cuda executable supplied; no GPU speedup will be estimated.", flush=True)
+    for backend in GPU_BACKENDS:
+        if not getattr(options, backend):
+            print(f"{GPU_LABELS[backend]} NOT MEASURED: no --{backend} executable supplied; "
+                  f"no {GPU_LABELS[backend]} speedup will be estimated.", flush=True)
     helper = helpers()
     corpora = []
     for name in dict.fromkeys(options.datasets):
@@ -456,7 +473,7 @@ def main():
     report["host"]["load_average_before"] = load_average()
     started = time.perf_counter()
     deadline = started + options.max_total_seconds
-    backends = list(dict.fromkeys(options.backends)) + (["cuda"] if options.cuda else [])
+    backends = list(dict.fromkeys(options.backends)) + [name for name in GPU_BACKENDS if getattr(options, name)]
     for payload, manifest in corpora:
         for backend in backends:
             print(f"Timing {manifest['name']} / {backend} ...", flush=True)
@@ -468,11 +485,13 @@ def main():
             print(f"  {measurement['status']}: "
                   + (f"{measurement['microseconds_per_graph']:.3f} us/graph, loops={measurement['loops']}"
                      if measurement["status"] == "ok" else measurement.get("error", "failed")), flush=True)
-            if options.cuda:
-                cuda_rows = [row for row in report["measurements"] if row["backend"] == "cuda"]
-                report["cuda_status"] = (
-                    "INCOMPLETE OR UNAVAILABLE" if any(row["status"] != "ok" for row in cuda_rows)
-                    else "MEASURED" if len(cuda_rows) == len(corpora)
+            for gpu in GPU_BACKENDS:
+                if not getattr(options, gpu):
+                    continue
+                gpu_rows = [row for row in report["measurements"] if row["backend"] == gpu]
+                report[gpu + "_status"] = (
+                    "INCOMPLETE OR UNAVAILABLE" if any(row["status"] != "ok" for row in gpu_rows)
+                    else "MEASURED" if len(gpu_rows) == len(corpora)
                     else "requested, measurements pending"
                 )
             report["elapsed_timing_seconds"] = time.perf_counter() - started

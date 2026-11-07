@@ -1,0 +1,8 @@
+#pragma once
+
+namespace nauty_cuda {
+inline constexpr char metal_source[] = R"nauty_metal(
+@NAUTY_METAL_CORE@
+@NAUTY_METAL_KERNEL@
+)nauty_metal";
+}

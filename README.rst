@@ -1,7 +1,7 @@
-CUDA canonical labelling prototype
+GPU canonical labelling prototype
 =================================
 
-This is an initial, independent C++/CUDA implementation of exact
+This is an initial, independent C++/CUDA/Metal implementation of exact
 individualization--refinement canonical labelling, with unmodified nauty as
 the test oracle. It is a starting point for the requested nauty/Traces GPU
 work, rather than a complete port of either program.
@@ -12,8 +12,8 @@ Scope
 * Simple, undirected, uncoloured graphs with 0 through 32 vertices.
 * Exact canonical forms and a permutation witness mapping canonical positions
   to input vertex numbers.
-* A shared host/device implementation and a CUDA batch runner, initially
-  assigning one graph to each GPU thread.
+* A shared host/device implementation, a CUDA batch runner, and an optional
+  native Apple Metal backend, assigning one graph to each GPU thread.
 * Explicit ``node_limit`` results when a search cannot finish within its budget.
   Incomplete results contain no canonical graph and must never be used for
   isomorphism rejection, deduplication, or graph-generation acceptance.
@@ -73,13 +73,48 @@ example targeting Ampere::
         --cuda build-cuda/nauty-canonical-cuda --max-order 8
 
 ``NAUTY_CUDA_REQUIRE_CUDA=ON`` makes a missing CUDA compiler a configuration
-failure. The ordinary optional build prints a warning when it builds only
-the CPU executable.
+failure. The ordinary optional build prints a warning when CUDA targets
+cannot be built.
+
+Optional native Apple GPU backend
+---------------------------------
+
+Enable Metal explicitly on macOS with an Apple silicon GPU. It is disabled
+by default and can be configured independently of CUDA::
+
+    cmake -S . -B build-metal -DCMAKE_BUILD_TYPE=Release \
+        -DNAUTY_CUDA_ENABLE_CUDA=OFF -DNAUTY_CUDA_ENABLE_METAL=ON
+    cmake --build build-metal -j
+    ctest --test-dir build-metal --output-on-failure
+    python3 tests/validate.py \
+        --cpu build-metal/nauty-canonical-cpu \
+        --metal build-metal/nauty-canonical-metal --max-order 8
+
+The compiler needs Objective-C++ and the Foundation/Metal frameworks, supplied
+by Apple's developer tools. The executable embeds the shared algorithm and
+shader source, then compiles the shader through Metal at runtime. An offline
+Metal compiler and the original source checkout are not needed to run it.
+Pipeline creation and buffer allocation happen once per CLI invocation, when
+the first nonempty batch arrives. An unavailable GPU or shader/dispatch error
+is reported explicitly; no CPU fallback is used.
+
+The CPU, CUDA and Metal implementations share the same refinement/search
+code and result layout. The test suite compares canonical graphs, witness
+permutations, and node counts exactly. Additional direct Metal tests cover
+malformed adjacency matrices, 64-bit budgets, maximal search depth, vertex 31,
+and batches crossing threadgroup boundaries. To check GPU memory accesses::
+
+    MTL_SHADER_VALIDATION=1 MTL_SHADER_VALIDATION_REPORT_TO_STDERR=1 \
+        MTL_SHADER_VALIDATION_ABORT_ON_FAULT=1 \
+        ctest --test-dir build-metal --output-on-failure -R metal-core -V
+
+Metal support has been tested on an M4 Max. CUDA execution still requires an
+NVIDIA GPU; Metal measurements are not CUDA measurements.
 
 Interface
 ---------
 
-Both executables read graph6 records from standard input and write JSONL::
+All backend executables read graph6 records from standard input and write JSONL::
 
     geng -q 8 | build/nauty-canonical-cpu --batch-size 4096 --max-nodes 1000000
 
@@ -91,7 +126,7 @@ internal invalid-input sentinel and include an explanatory ``error`` field.
 The default node budget is one million per graph; zero allows no search.
 Exit status 0 means all records completed, 2 means some were invalid or
 incomplete, and 3 means an option, I/O, or backend error occurred. Empty input
-does not initialize CUDA. Header-only lines are accepted.
+does not initialize the GPU. Header-only lines are accepted.
 
 Timing canonical labelling
 --------------------------
@@ -99,7 +134,8 @@ Timing canonical labelling
 Install the nauty library and its pkg-config metadata (``libnauty.pc``), then
 configure and build as above. With ``NAUTY_CUDA_BUILD_BENCHMARKS=ON`` (the
 default), CMake builds ``nauty-benchmark-cpu`` when it finds that library,
-and ``nauty-benchmark-cuda`` when CUDA is enabled. Run the CPU comparison::
+and the corresponding GPU benchmark when CUDA or Metal is enabled.
+Run the CPU comparison::
 
     python3 benchmarks/run.py --cpu build/nauty-benchmark-cpu
 
@@ -143,6 +179,22 @@ Use ``--random-count``, ``--symmetric-count``, and ``--batch-size`` to study
 batch-size effects, and increase ``--timeout``/``--max-total-seconds`` for
 longer runs. CUDA speedup is unmeasured until such a run succeeds.
 
+On the Apple GPU, run the corresponding Metal benchmark::
+
+    python3 benchmarks/run.py \
+        --cpu build-metal/nauty-benchmark-cpu \
+        --metal build-metal/nauty-benchmark-metal
+
+The primary Metal timer includes command/encoder creation and cleanup,
+input/output copies into shared buffers, dispatch, and synchronization.
+Shader compilation, persistent buffer allocation, parsing and validation are
+outside timing. A separate metric records the GPU command duration from
+``GPUEndTime - GPUStartTime``; this differs from CUDA event timing.
+The driver requires a matching CPU prototype checksum before reporting any
+GPU speedup. CUDA and Metal can both be supplied to the driver when available.
+Compare against optimized nauty/Traces as well as the prototype, and include
+a multicore CPU baseline before making whole-machine performance claims.
+
 Performance status and next steps
 ---------------------------------
 
@@ -159,9 +211,14 @@ Verified during development on 2026-11-07:
   and UndefinedBehaviorSanitizer on macOS ARM64.
 * NVIDIA NVCC 12.9.86 with GCC 13.3 on Ubuntu ARM64 compiled and linked the
   CUDA runner for SM80 and generated PTX. The Linux CPU core test passed.
-* NVIDIA GPU execution, Compute Sanitizer, and GPU timings remain untested.
+  Both CUDA targets also rebuilt successfully after the Metal compatibility
+  changes to the shared header.
+* All 55,636 valid cases passed exact CPU/Metal comparisons on the M4 Max,
+  alongside invalid-input and node-budget cases. Metal boundary tests also
+  passed with Apple's GPU Shader Validation enabled.
+* NVIDIA GPU execution, Compute Sanitizer, and CUDA timings remain untested.
 
-No NVIDIA GPU is available in the current development environment, so GPU
+No NVIDIA GPU is available in the current development environment, so CUDA
 correctness and performance have not been established. The CPU implementation
 is a correctness reference, not a competitive replacement for optimized nauty.
 The current per-thread search stack and variable search sizes may cause spills

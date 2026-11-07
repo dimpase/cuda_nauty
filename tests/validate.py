@@ -3,6 +3,7 @@
 
 Usage: python3 tests/validate.py --cpu build/nauty-canonical-cpu
        python3 tests/validate.py --cpu build/nauty-canonical-cpu --cuda build/nauty-canonical-cuda
+       python3 tests/validate.py --cpu build-metal/nauty-canonical-cpu --metal build-metal/nauty-canonical-metal
 
 Only the Python standard library is needed.  The oracle tools are geng and
 labelg from nauty.  The canonicalizer may choose a different canonical form
@@ -167,12 +168,14 @@ def validate_dataset(name, inputs, expected_classes, options):
             f"{name}: unexpected nauty class count {len(set(labels))}, expected {expected_classes}")
     cpu = invoke(options.cpu, inputs, options)
     classes = validate_class_partition(inputs, labels, cpu, name + " CPU")
-    if options.cuda:
-        gpu = invoke(options.cuda, inputs, options)
-        validate_class_partition(inputs, labels, gpu, name + " CUDA")
+    for backend, binary in (("CUDA", options.cuda), ("Metal", options.metal)):
+        if not binary:
+            continue
+        gpu = invoke(binary, inputs, options)
+        validate_class_partition(inputs, labels, gpu, name + " " + backend)
         for index, (host, device) in enumerate(zip(cpu, gpu)):
-            require(host["graph6"] == device["graph6"],
-                    f"{name}: CPU/CUDA canonical forms differ at row {index}")
+            require(host == device,
+                    f"{name}: CPU/{backend} results differ at row {index}")
     print(f"PASS {name}: {len(inputs):,} inputs, {classes:,} isomorphism classes", flush=True)
 
 
@@ -243,7 +246,7 @@ def symmetric_fixtures():
 
 def validate_limits_and_invalid(options):
     cycle = encode_graph6(graph(6, [(i, (i + 1) % 6) for i in range(6)]))
-    for binary in filter(None, (options.cpu, options.cuda)):
+    for binary in filter(None, (options.cpu, options.cuda, options.metal)):
         for budget in (0, 1):
             records = invoke(binary, [cycle, cycle], options, max_nodes=budget, incomplete=True)
             require(all(record["status"] == "node_limit" for record in records),
@@ -272,6 +275,7 @@ def parse_args():
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--cpu", default=str(ROOT / "build" / "nauty-canonical-cpu"))
     parser.add_argument("--cuda", help="CUDA executable; omitted means CUDA is explicitly untested")
+    parser.add_argument("--metal", help="Metal executable; omitted means Metal is explicitly untested")
     parser.add_argument("--geng", default=find_nauty_tool("geng"))
     parser.add_argument("--labelg", default=find_nauty_tool("labelg"))
     parser.add_argument("--max-order", type=int, default=7, choices=range(1, 9))
@@ -291,6 +295,8 @@ def main():
     options = parse_args()
     if not options.cuda:
         print("CUDA NOT TESTED: no --cuda executable supplied", flush=True)
+    if not options.metal:
+        print("METAL NOT TESTED: no --metal executable supplied", flush=True)
     # Fixed wire examples prevent a mutually consistent encoder/decoder bug.
     require(encode_graph6(()) == "?", "empty graph6 encoding")
     require(encode_graph6(graph(1, [])) == "@", "one-vertex graph6 encoding")
@@ -311,7 +317,9 @@ def main():
                      with_permutations(fixtures, rng, options.permutations),
                      fixture_classes, options)
     validate_limits_and_invalid(options)
-    print("PASS all CPU correctness checks" + (" and CUDA parity checks" if options.cuda else ""), flush=True)
+    checked = [name for name, binary in (("CUDA", options.cuda), ("Metal", options.metal)) if binary]
+    print("PASS all CPU correctness checks" + (" and " + "/".join(checked) + " parity checks" if checked else ""),
+          flush=True)
     return 0
 
 
